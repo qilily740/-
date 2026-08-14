@@ -15,22 +15,6 @@ html {
   overflow: hidden; /* 🔥整个html禁止滚动 */
 }
 
-.desktop-scroll-wrap {
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  /* 高度：视口总高度 减去Dock+圆点所占底部全部空间 */
-  height: calc(100dvh - 0px) !important;
-  overflow-x:auto;
-  overflow-y:hidden;
-  background:transparent !important;
-}
-.desktop-page {
-  background: transparent !important;
-}
-
-
 body{
   background-color: #ffffff;
   width:100vw;
@@ -40,11 +24,11 @@ body{
 }
 /* 横向滑动桌面容器 */
 .desktop-scroll-wrap{
-  height: calc(100vh - 94px);
+  height: calc(100vh - 140px);
   display:flex;
   overflow-x:auto; /* ✅只允许内部横向左右滑桌面页面 */
   scroll-snap-type:x mandatory;
-  background:#ffffff;
+  background:none;
   scrollbar-width:none;
 }
 .desktop-scroll-wrap::-webkit-scrollbar{
@@ -260,7 +244,7 @@ body{
   display:flex;
   justify-content:center;
   gap:7px;
-  padding-top:700px;
+  padding-top:6px;
   position:relative;
   z-index:2;
 }
@@ -282,7 +266,7 @@ body{
   display:flex;
   justify-content:space-around;
   align-items:center;
-  margin: 10px 12px 22px 12px;
+  margin: 10px 12px 32px 12px;
   padding:0 18px;
   position:relative;
   z-index:2;
@@ -956,3 +940,7 @@ body{
   font-size:16px;
   cursor:pointer;
 }
+
+
+
+
