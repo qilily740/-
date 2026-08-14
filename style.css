@@ -1,21 +1,27 @@
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body{
-  background-color: #ffffff;
-  min-height: 100vh;
-  overflow:hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+html {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; /* 🔥整个html禁止滚动 */
 }
 
+body{
+  background-color: #ffffff;
+  width:100vw;
+  height:100vh;
+  overflow:hidden; /* 🔥禁止body滚动，整体锁死全屏 */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+}
 /* 横向滑动桌面容器 */
 .desktop-scroll-wrap{
   height: calc(100vh - 94px);
   display:flex;
-  overflow-x:auto;
+  overflow-x:auto; /* ✅只允许内部横向左右滑桌面页面 */
   scroll-snap-type:x mandatory;
   background:#ffffff;
   scrollbar-width:none;
