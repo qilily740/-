@@ -15,6 +15,22 @@ html {
   overflow: hidden; /* 🔥整个html禁止滚动 */
 }
 
+.desktop-scroll-wrap {
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  /* 高度：视口总高度 减去Dock+圆点所占底部全部空间 */
+  height: calc(100dvh - 0px) !important;
+  overflow-x:auto;
+  overflow-y:hidden;
+  background:transparent !important;
+}
+.desktop-page {
+  background: transparent !important;
+}
+
+
 body{
   background-color: #ffffff;
   width:100vw;
@@ -244,7 +260,7 @@ body{
   display:flex;
   justify-content:center;
   gap:7px;
-  padding-top:6px;
+  padding-top:700px;
   position:relative;
   z-index:2;
 }
@@ -258,7 +274,7 @@ body{
   background:#48484a;
 }
 
-/* iOS17磨砂Dock栏 */
+/* Dock栏 */
 .dock-bar{
   height:72px;
   background:rgba(255,255,255,0.88);
@@ -266,7 +282,7 @@ body{
   display:flex;
   justify-content:space-around;
   align-items:center;
-  margin: 6px 12px 32px 12px;
+  margin: 10px 12px 22px 12px;
   padding:0 18px;
   position:relative;
   z-index:2;
