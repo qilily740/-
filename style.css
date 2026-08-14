@@ -24,7 +24,7 @@ body{
 }
 /* 横向滑动桌面容器 */
 .desktop-scroll-wrap{
-  height: calc(100vh - 140px);
+  height: calc(100vh - 130px);
   display:flex;
   overflow-x:auto; /* ✅只允许内部横向左右滑桌面页面 */
   scroll-snap-type:x mandatory;
