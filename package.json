@@ -1,0 +1,12 @@
+{
+  "name": "rili-calendar-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node rili-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.5"
+  }
+}

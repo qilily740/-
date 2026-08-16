@@ -1,0 +1,391 @@
+{
+  "__user__": {
+    "2026-08-01": {
+      "events": [],
+      "mood": "sad",
+      "period": false
+    },
+    "2026-08-02": {
+      "events": [],
+      "mood": "tired",
+      "period": false
+    },
+    "2026-08-03": {
+      "events": [
+        {
+          "text": "写日记",
+          "color": "#ff3b30",
+          "time": "08:48"
+        },
+        {
+          "text": "开会",
+          "color": "#007aff",
+          "time": "13:35"
+        }
+      ],
+      "mood": "",
+      "period": false
+    },
+    "2026-08-04": {
+      "events": [],
+      "mood": "excited",
+      "period": false
+    },
+    "2026-08-05": {
+      "events": [
+        {
+          "text": "晨跑",
+          "color": "#34c759",
+          "time": "10:02"
+        },
+        {
+          "text": "开会",
+          "color": "#007aff",
+          "time": "15:06"
+        }
+      ],
+      "mood": "sad",
+      "period": false
+    },
+    "2026-08-06": {
+      "events": [
+        {
+          "text": "晨跑",
+          "color": "#34c759",
+          "time": "16:56"
+        },
+        {
+          "text": "看电影",
+          "color": "#af52de",
+          "time": "14:18"
+        },
+        {
+          "text": "阅读",
+          "color": "#ff9500",
+          "time": "10:13"
+        }
+      ],
+      "mood": "sad",
+      "period": false
+    },
+    "2026-08-07": {
+      "events": [
+        {
+          "text": "开会",
+          "color": "#007aff",
+          "time": "08:25"
+        },
+        {
+          "text": "写日记",
+          "color": "#ff3b30",
+          "time": "10:32"
+        },
+        {
+          "text": "散步",
+          "color": "#34c759",
+          "time": "18:05"
+        }
+      ],
+      "mood": "sad",
+      "period": false
+    },
+    "2026-08-08": {
+      "events": [
+        {
+          "text": "看电影",
+          "color": "#af52de",
+          "time": "10:37"
+        },
+        {
+          "text": "写日记",
+          "color": "#ff3b30",
+          "time": "17:37"
+        },
+        {
+          "text": "晨跑",
+          "color": "#34c759",
+          "time": "19:09"
+        }
+      ],
+      "mood": "",
+      "period": false
+    },
+    "2026-08-09": {
+      "events": [
+        {
+          "text": "阅读",
+          "color": "#ff9500",
+          "time": "18:25"
+        },
+        {
+          "text": "写日记",
+          "color": "#ff3b30",
+          "time": "12:05"
+        },
+        {
+          "text": "开会",
+          "color": "#007aff",
+          "time": "18:48"
+        }
+      ],
+      "mood": "happy",
+      "period": false
+    },
+    "2026-08-10": {
+      "events": [
+        {
+          "text": "看电影",
+          "color": "#af52de",
+          "time": "17:00"
+        },
+        {
+          "text": "开会",
+          "color": "#007aff",
+          "time": "13:39"
+        }
+      ],
+      "mood": "",
+      "period": true
+    },
+    "2026-08-11": {
+      "events": [
+        {
+          "text": "写日记",
+          "color": "#ff3b30",
+          "time": "12:20"
+        },
+        {
+          "text": "散步",
+          "color": "#34c759",
+          "time": "15:04"
+        }
+      ],
+      "mood": "tired",
+      "period": true
+    },
+    "2026-08-12": {
+      "events": [
+        {
+          "text": "阅读",
+          "color": "#ff9500",
+          "time": "17:37"
+        },
+        {
+          "text": "开会",
+          "color": "#007aff",
+          "time": "14:15"
+        }
+      ],
+      "mood": "happy",
+      "period": true
+    },
+    "2026-08-13": {
+      "events": [
+        {
+          "text": "晨跑",
+          "color": "#34c759",
+          "time": "10:45"
+        },
+        {
+          "text": "写日记",
+          "color": "#ff3b30",
+          "time": "09:33"
+        }
+      ],
+      "mood": "sad",
+      "period": true
+    },
+    "2026-08-14": {
+      "events": [
+        {
+          "text": "看电影",
+          "color": "#af52de",
+          "time": "08:12"
+        }
+      ],
+      "mood": "",
+      "period": true
+    },
+    "2026-08-15": {
+      "events": [
+        {
+          "text": "看电影",
+          "color": "#af52de",
+          "time": "18:48"
+        }
+      ],
+      "mood": "",
+      "period": false
+    },
+    "2026-08-16": {
+      "events": [
+        {
+          "text": "看电影",
+          "color": "#af52de",
+          "time": "08:51"
+        },
+        {
+          "text": "散步",
+          "color": "#34c759",
+          "time": "15:52"
+        },
+        {
+          "text": "阅读",
+          "color": "#ff9500",
+          "time": "17:26"
+        }
+      ],
+      "mood": "happy",
+      "period": false
+    },
+    "2026-08-17": {
+      "events": [],
+      "mood": "happy",
+      "period": false
+    },
+    "2026-08-18": {
+      "events": [],
+      "mood": "",
+      "period": false
+    },
+    "2026-08-19": {
+      "events": [
+        {
+          "text": "阅读",
+          "color": "#ff9500",
+          "time": "17:20"
+        },
+        {
+          "text": "开会",
+          "color": "#007aff",
+          "time": "15:06"
+        },
+        {
+          "text": "晨跑",
+          "color": "#34c759",
+          "time": "12:35"
+        }
+      ],
+      "mood": "",
+      "period": false
+    },
+    "2026-08-20": {
+      "events": [],
+      "mood": "tired",
+      "period": false
+    },
+    "2026-08-21": {
+      "events": [],
+      "mood": "angry",
+      "period": false
+    },
+    "2026-08-22": {
+      "events": [
+        {
+          "text": "散步",
+          "color": "#34c759",
+          "time": "14:33"
+        }
+      ],
+      "mood": "happy",
+      "period": false
+    },
+    "2026-08-23": {
+      "events": [
+        {
+          "text": "看电影",
+          "color": "#af52de",
+          "time": "09:02"
+        }
+      ],
+      "mood": "happy",
+      "period": false
+    },
+    "2026-08-24": {
+      "events": [
+        {
+          "text": "看电影",
+          "color": "#af52de",
+          "time": "19:26"
+        }
+      ],
+      "mood": "angry",
+      "period": false
+    },
+    "2026-08-25": {
+      "events": [],
+      "mood": "happy",
+      "period": false
+    },
+    "2026-08-26": {
+      "events": [],
+      "mood": "angry",
+      "period": false
+    },
+    "2026-08-27": {
+      "events": [
+        {
+          "text": "看电影",
+          "color": "#af52de",
+          "time": "16:07"
+        }
+      ],
+      "mood": "",
+      "period": false
+    },
+    "2026-08-28": {
+      "events": [
+        {
+          "text": "散步",
+          "color": "#34c759",
+          "time": "17:58"
+        }
+      ],
+      "mood": "",
+      "period": false
+    },
+    "2026-08-29": {
+      "events": [
+        {
+          "text": "晨跑",
+          "color": "#34c759",
+          "time": "08:57"
+        }
+      ],
+      "mood": "excited",
+      "period": false
+    },
+    "2026-08-30": {
+      "events": [
+        {
+          "text": "晨跑",
+          "color": "#34c759",
+          "time": "17:54"
+        },
+        {
+          "text": "开会",
+          "color": "#007aff",
+          "time": "08:28"
+        },
+        {
+          "text": "散步",
+          "color": "#34c759",
+          "time": "19:18"
+        }
+      ],
+      "mood": "happy",
+      "period": false
+    },
+    "2026-08-31": {
+      "events": [
+        {
+          "text": "开会",
+          "color": "#007aff",
+          "time": "18:34"
+        }
+      ],
+      "mood": "",
+      "period": false
+    }
+  }
+}

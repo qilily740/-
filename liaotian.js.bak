@@ -1,0 +1,726 @@
+document.addEventListener('DOMContentLoaded', function () {
+    const chatModal = document.querySelector('#chatModal');
+    const chatBackBtn = document.querySelector('#chatBackBtn');
+    const chatTitle = document.querySelector('#chatTitle');
+    const chatReplyBtn = document.querySelector('#chatReplyBtn');
+    const chatSettingsBtn = document.querySelector('#chatSettingsBtn');
+    const chatMessages = document.querySelector('#chatMessages');
+    const chatInput = document.querySelector('#chatInput');
+    const chatSendBtn = document.querySelector('#chatSendBtn');
+    const chatPlusBtn = document.querySelector('#chatPlusBtn');
+    const chatPlusPanel = document.querySelector('#chatPlusPanel');
+    const chatEmojiBtn = document.querySelector('#chatEmojiBtn');
+    const chatStickerPanel = document.querySelector('#chatStickerPanel');
+    const chatSettingsPanel = document.querySelector('#chatSettingsPanel');
+    const chatShowTimeToggle = document.querySelector('#chatShowTimeToggle');
+    const stickerTabs = document.querySelector('#stickerTabs');
+    const stickerGrid = document.querySelector('#stickerGrid');
+    const stickerImportBtn = document.querySelector('#stickerImportBtn');
+    const stickerImportModal = document.querySelector('#stickerImportModal');
+    const stickerImportText = document.querySelector('#stickerImportText');
+    const stickerGroupName = document.querySelector('#stickerGroupName');
+    const stickerImportConfirm = document.querySelector('#stickerImportConfirm');
+    const stickerImportCancel = document.querySelector('#stickerImportCancel');
+    const stickerManageBtn = document.querySelector('#stickerManageBtn');
+    const stickerManageCancelBtn = document.querySelector('#stickerManageCancelBtn');
+    const stickerManageDeleteBtn = document.querySelector('#stickerManageDeleteBtn');
+    const chatChatPage = document.querySelector('#chatChatPage');
+    const chatFriendsPage = document.querySelector('#chatFriendsPage');
+    const chatMomentsPage = document.querySelector('#chatMomentsPage');
+    const chatMePage = document.querySelector('#chatMePage');
+    const chatMeContent = document.querySelector('#chatMeContent');
+    const chatMessagesPage = document.querySelector('#chatMessagesPage');
+    const chatMessagesList = document.querySelector('#chatMessagesList');
+    const chatContactsList = document.querySelector('#chatContactsList');
+    const chatMomentsContent = document.querySelector('#chatMomentsContent');
+    const chatTabBar = document.querySelector('.chat-tab-bar');
+
+    let chatHistory = [];
+    let isGenerating = false;
+    let showTime = true;
+    let currentStickerGroup = '默认';
+    let stickerGroups = { '默认': [] };
+    let openPanel = null;
+    let stickerManageMode = false;
+
+    function getAvatarUrl(type) {
+        if (type === 'user') return window.appData?.avatarUrl || '';
+        if (type === 'char') return window.appData?.charAvatarUrl || '';
+        return '';
+    }
+
+    function getActivePrompt() {
+        const cfg = window.appData?.shezhiConfig?.prompts;
+        if (!cfg || !cfg.sets || cfg.sets.length === 0) {
+            return "你是一个可爱的AI助手，请用温柔、可爱的语气回复用户。";
+        }
+        const active = cfg.sets.find(s => s.id === cfg.activeId);
+        return active ? active.content : cfg.sets[0].content;
+    }
+
+    function switchPage(page) {
+        const pageMap = {
+            messages: chatMessagesPage,
+            chat: chatChatPage,
+            contacts: chatContactsPage,
+            moments: chatMomentsPage,
+            me: chatMePage
+        };
+        
+        // 隐藏所有页面
+        Object.values(pageMap).forEach(el => {
+            if (el) el.classList.remove('active');
+        });
+        
+        // 显示目标页面
+        if (pageMap[page]) pageMap[page].classList.add('active');
+        
+        // 更新底部标签栏
+        if (chatTabBar) {
+            chatTabBar.querySelectorAll('.chat-tab-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.tab === page);
+            });
+        }
+        
+        // 更新标题
+        const titles = {
+            messages: '微信',
+            chat: (window.appData?.chatCurrentContact?.name) || '聊天',
+            contacts: '联系人',
+            moments: '朋友圈',
+            me: '我'
+        };
+        if (chatTitle) chatTitle.textContent = titles[page] || '微信';
+        
+        // 渲染页面内容
+        if (page === 'messages') renderMessageList();
+        else if (page === 'contacts') renderContacts();
+        else if (page === 'moments') renderMoments();
+        else if (page === 'me') renderMePage();
+    }
+    
+    function renderMessageList() {
+        if (!chatMessagesList) return;
+        const contacts = window.appData?.chatContacts || [];
+        if (contacts.length === 0) {
+            chatMessagesList.innerHTML = '<div style="text-align:center;color:#8e8e93;padding:40px 0;">暂无消息</div>';
+            return;
+        }
+        chatMessagesList.innerHTML = contacts.map(c => `
+            <div class="chat-msg-row" data-id="${escapeHtml(c.id)}">
+                <div class="chat-msg-row-avatar" style="background-image:url(${escapeHtml(c.avatar || '')})"></div>
+                <div class="chat-msg-row-info">
+                    <div class="chat-msg-row-name">${escapeHtml(c.name)}</div>
+                    <div class="chat-msg-row-preview">${escapeHtml(c.lastMsg || '')}</div>
+                </div>
+                <div class="chat-msg-row-meta">
+                    <div class="chat-msg-row-time">${escapeHtml(c.lastTime || '')}</div>
+                    ${c.unread > 0 ? `<span class="chat-msg-row-badge">${c.unread}</span>` : ''}
+                </div>
+            </div>
+        `).join('');
+        chatMessagesList.querySelectorAll('.chat-msg-row').forEach(row => {
+            row.onclick = function() {
+                const id = this.dataset.id;
+                const contact = (window.appData?.chatContacts || []).find(c => c.id === id);
+                if (!contact) return;
+                window.appData.chatCurrentContact = contact;
+                if (contact.unread) contact.unread = 0;
+                window.saveData?.();
+                switchPage('chat');
+            };
+        });
+    }
+    
+    function renderContacts() {
+        if (!chatContactsList) return;
+        const contacts = window.appData?.chatContacts || [];
+        let html = '<div class="chat-contact-add" id="chatAddContactBtn"><div class="chat-contact-add-icon">+</div><span>添加联系人</span></div>';
+        html += contacts.map(c => `
+            <div class="chat-contact-item" data-id="${escapeHtml(c.id)}">
+                <div class="chat-contact-avatar" style="background-image:url(${escapeHtml(c.avatar || '')})"></div>
+                <div class="chat-contact-name">${escapeHtml(c.name)}</div>
+            </div>
+        `).join('');
+        chatContactsList.innerHTML = html;
+        
+        const addBtn = document.querySelector('#chatAddContactBtn');
+        if (addBtn) {
+            addBtn.onclick = function() {
+                const name = prompt('联系人名称：');
+                if (!name || !name.trim()) return;
+                const newContact = {
+                    id: Date.now().toString(),
+                    name: name.trim(),
+                    avatar: '',
+                    lastMsg: '',
+                    lastTime: '',
+                    unread: 0
+                };
+                if (!window.appData.chatContacts) window.appData.chatContacts = [];
+                window.appData.chatContacts.push(newContact);
+                window.saveData?.();
+                renderContacts();
+                showToast('联系人已添加');
+            };
+        }
+        
+        chatContactsList.querySelectorAll('.chat-contact-item').forEach(item => {
+            item.onclick = function() {
+                const id = this.dataset.id;
+                const contact = (window.appData?.chatContacts || []).find(c => c.id === id);
+                if (!contact) return;
+                window.appData.chatCurrentContact = contact;
+                if (contact.unread) contact.unread = 0;
+                window.saveData?.();
+                switchPage('chat');
+            };
+        });
+    }
+    
+    function renderMoments() {
+        if (!chatMomentsContent) return;
+        const moments = window.appData?.chatMoments || [];
+        if (moments.length === 0) {
+            chatMomentsContent.innerHTML = '<div style="text-align:center;color:#8e8e93;padding:40px 0;">暂无朋友圈动态</div>';
+            return;
+        }
+        chatMomentsContent.innerHTML = moments.map(m => `
+            <div class="chat-moment-item">
+                <div class="chat-moment-header">
+                    <div class="chat-moment-avatar" style="background-image:url(${escapeHtml(m.avatar || '')})"></div>
+                    <div class="chat-moment-name">${escapeHtml(m.name)}</div>
+                </div>
+                <div class="chat-moment-text">${escapeHtml(m.text)}</div>
+                <div class="chat-moment-time">${escapeHtml(m.time)} · ${m.likes}赞</div>
+            </div>
+        `).join('');
+    }
+    
+    function renderMePage() {
+        if (!chatMeContent) return;
+        const data = window.appData || {};
+        chatMeContent.innerHTML = `
+            <div style="background:#fff;padding:40px 16px;text-align:center;border-bottom:0.5px solid #e5e5ea;">
+                <div style="width:80px;height:80px;border-radius:50%;background:#e8e8ed;margin:0 auto 16px;background-image:url(${escapeHtml(data.avatarUrl || '')});background-size:cover;background-position:center;"></div>
+                <div style="font-size:20px;font-weight:600;color:#1d1d1f;margin-bottom:6px;">${escapeHtml(data.userName || '用户昵称')}</div>
+                <div style="font-size:14px;color:#8e8e93;">${escapeHtml(data.signature || '')}</div>
+            </div>
+            <div style="margin-top:12px;background:#fff;border-radius:12px;overflow:hidden;">
+                <div class="ios-cell">
+                    <span class="ios-cell-label">服务</span>
+                    <span class="ios-cell-arrow">›</span>
+                </div>
+            </div>
+            <div style="margin-top:12px;background:#fff;border-radius:12px;overflow:hidden;">
+                <div class="ios-cell">
+                    <span class="ios-cell-label">收藏</span>
+                    <span class="ios-cell-arrow">›</span>
+                </div>
+                <div class="ios-cell">
+                    <span class="ios-cell-label">朋友圈</span>
+                    <span class="ios-cell-arrow">›</span>
+                </div>
+                <div class="ios-cell">
+                    <span class="ios-cell-label">卡包</span>
+                    <span class="ios-cell-arrow">›</span>
+                </div>
+                <div class="ios-cell">
+                    <span class="ios-cell-label">表情</span>
+                    <span class="ios-cell-arrow">›</span>
+                </div>
+            </div>
+            <div style="margin-top:12px;background:#fff;border-radius:12px;overflow:hidden;">
+                <div class="ios-cell">
+                    <span class="ios-cell-label">设置</span>
+                    <span class="ios-cell-arrow">›</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function updateTitle() {
+        if (chatTitle && window.appData) {
+            chatTitle.textContent = window.appData.charName || "角色昵称";
+        }
+    }
+
+    function addMessage(role, text, type) {
+        const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        chatHistory.push({ role, text, time, type: type || 'text' });
+        renderMessages();
+    }
+
+    function isLastOfGroup(index) {
+        if (index === chatHistory.length - 1) return true;
+        const current = chatHistory[index];
+        const next = chatHistory[index + 1];
+        return current.role !== next.role;
+    }
+
+    function renderMessages() {
+        if (!chatMessages) return;
+        chatMessages.innerHTML = chatHistory.map((msg, idx) => {
+            const isUser = msg.role === 'user';
+            const avatarStyle = `style="background-image:url(${getAvatarUrl(msg.role)})"`;
+            const showTimeClass = (showTime && isLastOfGroup(idx)) ? '' : ' chat-msg-no-time';
+            const isSticker = msg.type === 'sticker';
+            const bubbleContent = isSticker 
+                ? `<img class="chat-sticker-img" src="${escapeHtml(msg.text)}" alt="sticker">`
+                : escapeHtml(msg.text);
+            return `
+                <div class="chat-msg ${isUser ? 'chat-msg-user' : 'chat-msg-char'}${showTimeClass}">
+                    <div class="chat-msg-avatar" ${avatarStyle}></div>
+                    <div class="chat-msg-body">
+                        <div class="chat-msg-bubble">${bubbleContent}</div>
+                        <div class="chat-msg-time">${msg.time}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return "";
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    function showToast(msg) {
+        const old = document.querySelector('.ios-toast');
+        if (old) old.remove();
+        const t = document.createElement('div');
+        t.className = 'ios-toast';
+        t.innerText = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 2000);
+    }
+
+    function closeAllPanels() {
+        if (chatPlusPanel) chatPlusPanel.classList.remove('show');
+        if (chatStickerPanel) chatStickerPanel.classList.remove('show');
+        if (chatSettingsPanel) chatSettingsPanel.classList.remove('show');
+        stickerManageMode = false;
+        if (stickerManageBtn) stickerManageBtn.style.background = '';
+        if (stickerManageCancelBtn) stickerManageCancelBtn.style.display = 'none';
+        if (stickerManageDeleteBtn) stickerManageDeleteBtn.style.display = 'none';
+        openPanel = null;
+    }
+
+    async function callAI(userText) {
+        const cfg = window.appData?.shezhiConfig?.api;
+        if (!cfg || !cfg.baseUrl || !cfg.apiKey) {
+            showToast("请先在设置中配置API");
+            return;
+        }
+
+        isGenerating = true;
+        addMessage('char', '...');
+
+        const messages = chatHistory.filter(m => m.text !== '...').map(m => ({
+            role: m.role === 'user' ? 'user' : 'assistant',
+            content: m.text
+        }));
+
+        const systemPrompt = getActivePrompt() + 
+            (window.appData?.worldBook || '');
+
+        try {
+            const base = cfg.baseUrl.replace(/\/+$/, "");
+            const url = base.endsWith('/v1') ? base + '/chat/completions' : base + '/v1/chat/completions';
+            const resp = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + cfg.apiKey
+                },
+                body: JSON.stringify({
+                    model: cfg.modelName || "gpt-3.5-turbo",
+                    messages: [
+                        { role: "system", content: systemPrompt || "你是一个可爱的AI助手。" },
+                        ...messages
+                    ],
+                    stream: true
+                })
+            });
+
+            if (!resp.ok) throw new Error("HTTP " + resp.status);
+
+            const reader = resp.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+
+            chatHistory[chatHistory.length - 1].text = '';
+            renderMessages();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n').filter(line => line.trim().startsWith('data:'));
+                for (const line of lines) {
+                    const data = line.replace('data:', '').trim();
+                    if (data === '[DONE]') continue;
+                    try {
+                        const json = JSON.parse(data);
+                        const delta = json.choices?.[0]?.delta?.content || '';
+                        fullText += delta;
+                        chatHistory[chatHistory.length - 1].text = fullText;
+                        renderMessages();
+                    } catch (e) {}
+                }
+            }
+
+            if (!fullText) {
+                chatHistory[chatHistory.length - 1].text = "（无回复内容）";
+                renderMessages();
+            }
+        } catch (e) {
+            chatHistory[chatHistory.length - 1].text = "请求失败：" + e.message;
+            renderMessages();
+            showToast("请求失败");
+        } finally {
+            isGenerating = false;
+            const notifyCfg = window.appData?.shezhiConfig?.notify;
+            if (notifyCfg?.enable && fullText) {
+                showToast("角色回复了你");
+            }
+            if (notifyCfg?.soundUrl && fullText) {
+                const audio = new Audio(notifyCfg.soundUrl);
+                audio.play().catch(() => {});
+            }
+        }
+    }
+
+    function renderStickerTabs() {
+        if (!stickerTabs) return;
+        const groups = Object.keys(stickerGroups);
+        stickerTabs.innerHTML = groups.map(g => 
+            `<button class="sticker-tab ${g === currentStickerGroup ? 'active' : ''}" data-group="${escapeHtml(g)}">${escapeHtml(g)}</button>`
+        ).join('');
+        stickerTabs.querySelectorAll('.sticker-tab').forEach(tab => {
+            tab.onclick = function() {
+                if (stickerManageMode) return;
+                currentStickerGroup = this.dataset.group;
+                renderStickerTabs();
+                renderStickerGrid();
+            };
+        });
+    }
+
+    function renderStickerGrid() {
+        if (!stickerGrid) return;
+        const stickers = stickerGroups[currentStickerGroup] || [];
+        stickerGrid.innerHTML = stickers.map((s, idx) => 
+            `<div class="sticker-item${stickerManageMode ? ' sticker-manage-mode' : ''}" data-idx="${idx}">
+                ${stickerManageMode ? '<input type="checkbox" class="sticker-checkbox" data-idx="' + idx + '">' : ''}
+                <div class="sticker-img" style="background-image:url(${escapeHtml(s.url)})"></div>
+                <div class="sticker-label">${escapeHtml(s.label)}</div>
+            </div>`
+        ).join('');
+        stickerGrid.querySelectorAll('.sticker-item').forEach(item => {
+            item.onclick = function(e) {
+                if (stickerManageMode) {
+                    const checkbox = this.querySelector('.sticker-checkbox');
+                    if (checkbox) checkbox.checked = !checkbox.checked;
+                    return;
+                }
+                const idx = Number(this.dataset.idx);
+                const sticker = stickerGroups[currentStickerGroup][idx];
+                if (sticker) {
+                    addMessage('user', sticker.url, 'sticker');
+                    if (chatStickerPanel) chatStickerPanel.classList.remove('show');
+                }
+            };
+        });
+    }
+
+    window.openChatModal = function () {
+        if (!chatModal) return;
+        chatModal.classList.add('show');
+        initChatData();
+        switchPage('messages');
+    };
+
+    function initChatData() {
+        if (!window.appData) window.appData = {};
+        
+        // 初始化联系人（角色）
+        if (!window.appData.chatContacts) {
+            window.appData.chatContacts = [
+                { id: '1', name: '角色1', avatar: '', lastMsg: '', lastTime: '', unread: 0 },
+                { id: '2', name: '角色2', avatar: '', lastMsg: '', lastTime: '', unread: 0 }
+            ];
+        }
+        
+        // 初始化消息记录
+        if (!window.appData.chatMessages) {
+            window.appData.chatMessages = {};
+        }
+        
+        // 初始化朋友圈
+        if (!window.appData.chatMoments) {
+            window.appData.chatMoments = [
+                { id: '1', name: '角色1', avatar: '', text: '今天天气真好！', time: '10:30', likes: 2 },
+                { id: '2', name: '用户', avatar: '', text: '分享生活点滴', time: '昨天', likes: 5 }
+            ];
+        }
+    }
+
+
+
+    if (chatSendBtn) {
+        chatSendBtn.onclick = function () {
+            if (!chatInput) return;
+            const text = chatInput.value.trim();
+            if (!text || isGenerating) return;
+            addMessage('user', text);
+            chatInput.value = '';
+            callAI(text);
+        };
+    }
+
+    if (chatInput) {
+        chatInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatSendBtn?.click();
+            }
+        });
+    }
+
+    if (chatReplyBtn) {
+        chatReplyBtn.onclick = function () {
+            if (isGenerating) return;
+            const lastUserMsg = [...chatHistory].reverse().find(m => m.role === 'user');
+            if (!lastUserMsg) {
+                showToast("请先发送消息");
+                return;
+            }
+            callAI(lastUserMsg.text);
+        };
+    }
+
+    if (chatPlusBtn && chatPlusPanel) {
+        chatPlusBtn.onclick = function (e) {
+            e.stopPropagation();
+            const isShow = chatPlusPanel.classList.contains('show');
+            closeAllPanels();
+            if (!isShow) {
+                chatPlusPanel.classList.add('show');
+                openPanel = 'plus';
+            }
+        };
+    }
+
+    if (chatEmojiBtn) {
+        chatEmojiBtn.onclick = function (e) {
+            e.stopPropagation();
+            const isShow = chatStickerPanel.classList.contains('show');
+            closeAllPanels();
+            if (!isShow) {
+                stickerManageMode = false;
+                if (stickerManageBtn) stickerManageBtn.style.background = '';
+                renderStickerTabs();
+                renderStickerGrid();
+                chatStickerPanel.classList.add('show');
+                openPanel = 'sticker';
+            }
+        };
+    }
+
+    if (stickerManageBtn) {
+        stickerManageBtn.onclick = function(e) {
+            e.stopPropagation();
+            stickerManageMode = true;
+            this.style.background = 'rgba(0,0,0,0.1)';
+            if (stickerManageCancelBtn) stickerManageCancelBtn.style.display = 'flex';
+            if (stickerManageDeleteBtn) stickerManageDeleteBtn.style.display = 'flex';
+            renderStickerTabs();
+            renderStickerGrid();
+            showToast("点击表情包进行多选，然后点击删除");
+        };
+    }
+
+    if (stickerManageCancelBtn) {
+        stickerManageCancelBtn.onclick = function(e) {
+            e.stopPropagation();
+            stickerManageMode = false;
+            this.style.display = 'none';
+            if (stickerManageDeleteBtn) stickerManageDeleteBtn.style.display = 'none';
+            if (stickerManageBtn) stickerManageBtn.style.background = '';
+            renderStickerTabs();
+            renderStickerGrid();
+        };
+    }
+
+    if (stickerManageDeleteBtn) {
+        stickerManageDeleteBtn.onclick = function(e) {
+            e.stopPropagation();
+            deleteSelectedStickers();
+            stickerManageMode = false;
+            this.style.display = 'none';
+            if (stickerManageCancelBtn) stickerManageCancelBtn.style.display = 'none';
+            if (stickerManageBtn) stickerManageBtn.style.background = '';
+            renderStickerTabs();
+            renderStickerGrid();
+        };
+    }
+
+    function deleteSelectedStickers() {
+        if (!stickerGrid) return;
+        const checkboxes = stickerGrid.querySelectorAll('.sticker-checkbox:checked');
+        if (checkboxes.length === 0) {
+            showToast("请先选择要删除的表情包");
+            return;
+        }
+        const idxs = Array.from(checkboxes).map(cb => Number(cb.dataset.idx)).sort((a, b) => b - a);
+        const stickers = stickerGroups[currentStickerGroup] || [];
+        idxs.forEach(idx => {
+            if (idx >= 0 && idx < stickers.length) {
+                stickers.splice(idx, 1);
+            }
+        });
+        showToast(`已删除 ${idxs.length} 个表情`);
+    }
+
+    document.querySelectorAll('.chat-plus-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const action = this.dataset.action;
+            closeAllPanels();
+            showToast(action === 'transfer' ? '转账功能开发中' : 
+                      action === 'redpacket' ? '红包功能开发中' : 
+                      action === 'photo' ? '照片功能开发中' : '文件功能开发中');
+        });
+    });
+
+    if (chatReplyBtn) {
+        chatReplyBtn.onclick = function (e) {
+            e.stopPropagation();
+            if (isGenerating) return;
+            const lastUserMsg = [...chatHistory].reverse().find(m => m.role === 'user');
+            if (!lastUserMsg) {
+                showToast("请先发送消息");
+                return;
+            }
+            callAI(lastUserMsg.text);
+        };
+    }
+
+    if (chatSettingsBtn) {
+        chatSettingsBtn.onclick = function(e) {
+            e.stopPropagation();
+            const isShow = chatSettingsPanel.classList.contains('show');
+            closeAllPanels();
+            if (!isShow) {
+                if (chatShowTimeToggle) chatShowTimeToggle.checked = showTime;
+                chatSettingsPanel.classList.add('show');
+                openPanel = 'settings';
+            }
+        };
+    }
+
+    if (chatShowTimeToggle) {
+        chatShowTimeToggle.onchange = function() {
+            showTime = this.checked;
+            renderMessages();
+        };
+    }
+
+    if (stickerImportBtn) {
+        stickerImportBtn.onclick = function() {
+            closeAllPanels();
+            if (stickerImportGroupSelect) {
+                const groups = Object.keys(stickerGroups);
+                stickerImportGroupSelect.innerHTML = groups.map(g => 
+                    `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`
+                ).join('');
+            }
+            if (stickerImportModal) stickerImportModal.classList.add('show');
+        };
+    }
+
+    if (stickerImportConfirm) {
+        stickerImportConfirm.onclick = function() {
+            const text = stickerImportText ? stickerImportText.value.trim() : '';
+            let groupName = stickerImportGroupSelect ? stickerImportGroupSelect.value : '默认';
+            const newGroupName = stickerGroupName ? stickerGroupName.value.trim() : '';
+            if (newGroupName) {
+                groupName = newGroupName;
+                if (!stickerGroups[groupName]) stickerGroups[groupName] = [];
+            }
+            if (!text) {
+                showToast("请输入表情包内容");
+                return;
+            }
+            const lines = text.split('\n').filter(l => l.trim());
+            const newStickers = [];
+            lines.forEach(line => {
+                let label = '', url = '';
+                if (line.includes('|')) {
+                    const parts = line.split('|');
+                    label = parts[0].trim();
+                    url = parts.slice(1).join('|').trim();
+                } else {
+                    const tokens = line.trim().split(/\s+/);
+                    const lastToken = tokens[tokens.length - 1];
+                    if (lastToken.startsWith('http://') || lastToken.startsWith('https://')) {
+                        url = lastToken;
+                        label = tokens.slice(0, -1).join(' ').trim();
+                    }
+                }
+                if (label && url) {
+                    newStickers.push({ label, url });
+                }
+            });
+            if (newStickers.length === 0) {
+                showToast("未识别到有效表情包");
+                return;
+            }
+            if (!stickerGroups[groupName]) stickerGroups[groupName] = [];
+            stickerGroups[groupName].push(...newStickers);
+            currentStickerGroup = groupName;
+            renderStickerTabs();
+            renderStickerGrid();
+            if (stickerImportText) stickerImportText.value = '';
+            if (stickerGroupName) stickerGroupName.value = '';
+            if (stickerImportModal) stickerImportModal.classList.remove('show');
+            showToast(`成功导入 ${newStickers.length} 个表情`);
+        };
+    }
+
+    if (stickerImportCancel) {
+        stickerImportCancel.onclick = function() {
+            if (stickerImportModal) stickerImportModal.classList.remove('show');
+        };
+    }
+
+    if (stickerImportModal) {
+        stickerImportModal.addEventListener('click', function(e) {
+            if (e.target === stickerImportModal) {
+                stickerImportModal.classList.remove('show');
+            }
+        });
+    }
+
+    if (chatTabBar) {
+        chatTabBar.querySelectorAll('.chat-tab-item').forEach(item => {
+            item.onclick = function() {
+                const tab = this.dataset.tab;
+                switchPage(tab);
+            };
+        });
+    }
+
+    if (chatModal) {
+        chatModal.addEventListener("click", function (e) {
+            if (e.target === chatModal) {
+                closeAllPanels();
+            }
+        });
+    }
+});

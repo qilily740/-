@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <!-- iOS添加主屏幕：移除浏览器地址栏，独立全屏运行 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 状态栏，时间电池那一条，半透明 -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  <title>理想机</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg" id="pwaIcon">
+  <link rel="apple-touch-icon" href="icon.svg" id="pwaAppleIcon">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 可左右滑动桌面容器 -->
+  <div class="desktop-scroll-wrap">
+    <!-- 第1桌面页：个人页 + 待办方块 -->
+    <div class="desktop-page page-1">
+      <div class="bg-layer"></div>
+      <div class="profile-card">
+        <div class="person-wrap">
+          <!-- user：头像｜名字 -->
+          <div class="user-item">
+            <div class="avatar-box">
+              <div class="avatar user-avatar"></div>
+            </div>
+            <span class="nickname-text" contenteditable="true">用户昵称</span>
+          </div>
+
+          <!-- char：名字｜头像，头像贴卡片最右 -->
+          <div class="char-item">
+            <span class="nickname-text" contenteditable="true">角色昵称</span>
+            <div class="avatar-box">
+              <div class="avatar char-avatar"></div>
+            </div>
+          </div>
+        </div>
+        <!-- 个性签名，在两组名字下方，居中 -->
+        <div class="sign-text" contenteditable="true">共同个性签名</div>
+      </div>
+
+      <div class="page1-middle">
+        <!-- 左：待办方块 -->
+        <div class="todo-widget">
+          <div class="todo-title">待办</div>
+          <div class="todo-list"></div>
+          <div class="todo-new-row" contenteditable="true" spellcheck="false" data-role="new">吃饭，回车增加</div>
+        </div>
+        <!-- 右：2×2图标 聊天、Ta、论坛、日历 -->
+        <div class="page1-apps-grid">
+          <div class="app-item">
+            <div class="app-icon"></div>
+            <div class="app-name">聊天</div>
+          </div>
+          <div class="app-item">
+            <div class="app-icon"></div>
+            <div class="app-name">Ta</div>
+          </div>
+          <div class="app-item">
+            <div class="app-icon"></div>
+            <div class="app-name">论坛</div>
+          </div>
+          <div class="app-item">
+            <div class="app-icon"></div>
+            <div class="app-name">日历          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- 第2桌面页：搜索框 + 三张竖版照片 -->
+    <div class="desktop-page page-2">
+      <div class="bg-layer"></div>
+      <div class="search-wrap">
+        <input class="search-input" placeholder="搜索…">
+      </div>
+
+      <div class="photo-group">
+        <div class="photo-card" data-index="0"></div>
+        <div class="photo-card" data-index="1"></div>
+        <div class="photo-card" data-index="2"></div>
+      </div>
+
+      <!-- 第二页图标，在照片下方 -->
+      <div class="page2-apps-grid">
+        <div class="app-item"><div class="app-icon"></div><div class="app-name">音乐</div></div>
+        <div class="app-item"><div class="app-icon"></div><div class="app-name">游戏</div></div>
+        <div class="app-item"><div class="app-icon"></div><div class="app-name">购物</div></div>
+        <div class="app-item"><div class="app-icon"></div><div class="app-name">if时空</div></div>
+      </div>
+
+      <div class="date-calendar-card">
+  <div class="date-calendar-avatar avatar-click">
+    <img class="cal-avatar-img" src="" alt="角色头像" />
+  </div>
+  <div class="date-calendar-left">
+    <div class="date-calendar-year"></div>
+    <div class="date-calendar-month-day"></div>
+    <div class="date-calendar-weekday"></div>
+  </div>
+  <div class="date-calendar-right">
+    <div class="calendar-header">
+      <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+    </div>
+    <div class="calendar-days"></div>
+  </div>
+  <!-- 下拉月历面板 -->
+  <div class="calendar-detail-modal">
+    <div class="calendar-detail-inner">
+      <!-- 年月翻页栏 -->
+      <div class="calendar-detail-header">
+        <button class="page-btn prev">&lt;</button>
+        <span class="calendar-detail-title"></span>
+        <button class="page-btn next">&gt;</button>
+      </div>
+      <!-- 星期行【移出滚动容器，滚动时固定】 -->
+      <div class="detail-week-header">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <!-- 只有日期区域滚动 -->
+      <div class="calendar-detail-content">
+        <div class="detail-day-wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+
+  <!-- 日历头像本地相册隐藏input -->
+  <input type="file" id="calAvatarFile" accept="image/*" style="display:none;">
+
+  <!-- 页面指示器小圆点 -->
+  <div class="page-indicator">
+    <span class="dot active"></span>
+    <span class="dot"></span>
+  </div>
+
+  <!-- 底部Dock栏：美化按钮加上id="btnMeihua" -->
+  <div class="dock-bar">
+    <div class="dock-item" id="dockShezhi"><div class="dock-icon"></div><div class="dock-name">设置</div></div>
+    <div class="dock-item" id="btnMeihua"><div class="dock-icon"></div><div class="dock-name">美化</div></div>
+    <div class="dock-item"><div class="dock-icon"></div><div class="dock-name">世界书</div></div>
+    <div class="dock-item"><div class="dock-icon"></div><div class="dock-name">情侣空间</div></div>
+</div>
+
+  <!-- ========== 美化App弹窗容器 ========== -->
+  <div class="app-modal">
+    <div class="app-modal-inner">
+      <div class="app-modal-header">
+        <span class="app-modal-title">美化设置</span>
+        <button class="app-close-btn">✕</button>
+      </div>
+      <div class="app-modal-content">
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========图片选择小弹窗 ========== -->
+  <div class="image-select-modal">
+    <div class="image-select-inner">
+      <h4>更换图片</h4>
+      <input class="img-url-input" placeholder="粘贴图片URL">
+      <div class="img-btn-row">
+        <button class="img-btn-url">使用URL</button>
+        <button class="img-btn-local">选择本地相册</button>
+      </div>
+      <button class="img-btn-cancel">取消</button>
+    </div>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" style="display:none;">
+
+  <!-- ==========壁纸选择弹窗 ========== -->
+  <div class="wallpaper-select-modal">
+    <div class="wallpaper-select-inner">
+      <h4>设置壁纸</h4>
+      <input class="wall-url-input" placeholder="粘贴壁纸URL">
+      <div class="wall-btn-row">
+        <button class="wall-btn-url">使用URL</button>
+        <button class="wall-btn-local">选择本地图片</button>
+      </div>
+      <button class="wall-btn-cancel">取消</button>
+    </div>  
+  </div>
+  <input type="file" id="wallFileInput" accept="image/*" style="display:none;">
+
+  <!-- ==========App图标编辑弹窗 ========== -->
+  <div class="appicon-edit-modal">
+    <div class="appicon-edit-inner">
+      <h4>修改App</h4>
+      <input class="app-name-input" placeholder="App名称">
+      <input class="app-iconurl-input" placeholder="图标URL">
+      <div class="appicon-btn-row">
+        <button class="appicon-save">保存</button>
+        <button class="appicon-cancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- ========== 聊天App弹窗容器 ========== -->
+  <div class="app-modal" id="chatModal">
+    <div class="app-modal-inner">
+      <div class="chat-header">
+        <button class="chat-back-btn" id="chatBackBtn">‹</button>
+        <span class="chat-title" id="chatTitle"></span>
+        <button class="chat-menu-btn" id="chatMenuBtn" style="display:none;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+        <button class="chat-settings-btn" id="chatSettingsBtn" style="display:none;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <button class="chat-add-btn" id="chatAddBtn" style="display:none;">+</button>
+      </div>
+      <div class="chat-body">
+        <!-- 消息列表页 -->
+        <div class="chat-page active" id="chatMessagesPage">
+          <div class="chat-messages-list" id="chatMessagesList"></div>
+        </div>
+        <!-- 聊天页 -->
+        <div class="chat-page" id="chatChatPage">
+          <div class="chat-wallpaper" id="chatWallpaper"></div>
+          <div class="chat-messages" id="chatMessages"></div>
+        </div>
+        <!-- 联系人页 -->
+        <div class="chat-page" id="chatContactsPage">
+          <div class="chat-contacts-list" id="chatContactsList"></div>
+        </div>
+        <!-- 朋友圈页 -->
+        <div class="chat-page" id="chatMomentsPage">
+          <div class="chat-moments-content" id="chatMomentsContent"></div>
+        </div>
+        <!-- 我页面 -->
+        <div class="chat-page" id="chatMePage">
+          <div class="chat-me-content" id="chatMeContent"></div>
+        </div>
+        <!-- 联系人编辑页面 -->
+        <div class="chat-page" id="chatContactEditPage">
+          <div class="chat-contact-edit">
+            <div class="contact-edit-header">
+              <div class="contact-avatar-edit" id="contactAvatarEdit">
+                <div class="contact-avatar-preview" id="contactAvatarPreview"></div>
+              </div>
+              <input type="file" id="contactAvatarFileInput" accept="image/*" style="display:none;">
+            </div>
+            <div class="contact-edit-form">
+              <div class="contact-form-item">
+                <label class="contact-form-label">真实姓名</label>
+                <input class="contact-form-input" id="contactRealNameInput" placeholder="请输入真实姓名">
+              </div>
+              <div class="contact-form-item">
+                <label class="contact-form-label">网名</label>
+                <input class="contact-form-input" id="contactNicknameInput" placeholder="请输入网名">
+              </div>
+              <div class="contact-form-item">
+                <label class="contact-form-label">性别</label>
+                <select class="contact-form-select" id="contactGenderSelect">
+                  <option value="">请选择</option>
+                  <option value="男">男</option>
+                  <option value="女">女</option>
+                  <option value="保密">保密</option>
+                </select>
+              </div>
+              <div class="contact-form-item">
+                <label class="contact-form-label">生日</label>
+                <input class="contact-form-input" id="contactBirthdayInput" placeholder="例如 2000-01-01">
+              </div>
+              <div class="contact-form-item">
+                <label class="contact-form-label">人设概括</label>
+                <textarea class="contact-form-textarea" id="contactBioInput" placeholder="请输入人设概括"></textarea>
+              </div>
+              <div class="contact-form-item" id="worldBookBindingSection">
+                <label class="contact-form-label">世界书绑定</label>
+                <div id="worldBookBindingList"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 聊天设置页面 -->
+        <div class="chat-page" id="chatChatSettingsPage">
+          <div class="chat-me-content" id="chatChatSettingsContent"></div>
+        </div>
+        <!-- 角色查询页面 -->
+        <div class="chat-page" id="chatChatProfilePage">
+          <div class="chat-me-content" id="chatChatProfileContent"></div>
+        </div>
+        <!-- 记忆库页面 -->
+        <div class="chat-page" id="chatMemoryLibraryPage">
+          <div class="chat-me-content" id="chatMemoryLibraryContent"></div>
+        </div>
+      </div>
+      <!-- 聊天页底部输入区 -->
+      <div class="chat-chat-footer" id="chatChatFooter" style="display:none;">
+        <div class="chat-input-area">
+          <div class="chat-input-bar">
+            <div class="chat-input-wrap">
+              <input class="chat-input" id="chatInput" placeholder="输入消息...">
+              <button class="chat-emoji-inner" id="chatEmojiBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              </button>
+            </div>
+            <button class="chat-icon-btn" id="chatPlusBtn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="chat-icon-btn" id="chatSendBtn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+            <button class="chat-icon-btn" id="chatReplyBtn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06 1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+          </div>
+          <div class="chat-plus-panel" id="chatPlusPanel">
+            <div class="chat-plus-grid">
+              <div class="chat-plus-item" data-action="transfer">
+                <div class="chat-plus-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg>
+                </div>
+                <div class="chat-plus-label">转账</div>
+              </div>
+              <div class="chat-plus-item" data-action="redpacket">
+                <div class="chat-plus-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                </div>
+                <div class="chat-plus-label">红包</div>
+              </div>
+              <div class="chat-plus-item" data-action="photo">
+                <div class="chat-plus-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </div>
+                <div class="chat-plus-label">照片</div>
+              </div>
+              <div class="chat-plus-item" data-action="file">
+                <div class="chat-plus-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div class="chat-plus-label">文件</div>
+              </div>
+            </div>
+           </div>
+           <div class="chat-sticker-backdrop" id="chatStickerBackdrop"></div>
+           <div class="chat-sticker-panel" id="chatStickerPanel">
+             <div class="sticker-tabs-row">
+               <div class="sticker-tabs" id="stickerTabs"></div>
+               <div class="sticker-actions">
+                 <button class="chat-icon-btn sticker-manage-cancel" id="stickerManageCancelBtn" style="display:none;" title="取消">
+                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                 </button>
+                 <button class="chat-icon-btn sticker-manage-delete" id="stickerManageDeleteBtn" style="display:none;" title="删除选中">
+                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                 </button>
+                 <button class="chat-icon-btn" id="stickerManageBtn" title="管理表情包">
+                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                 </button>
+                 <button class="chat-icon-btn" id="stickerImportBtn">
+                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                 </button>
+               </div>
+             </div>
+             <div class="sticker-grid" id="stickerGrid"></div>
+           </div>
+            <div class="chat-settings-panel" id="chatSettingsPanel">
+            </div>
+          </div>
+        </div>
+      <!-- 底部导航 -->
+      <div class="chat-tab-bar" id="chatTabBar">
+        <button class="chat-tab-item active" data-tab="messages">
+          <svg class="chat-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="chat-tab-label">消息</span>
+        </button>
+        <button class="chat-tab-item" data-tab="contacts">
+          <svg class="chat-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="chat-tab-label">联系人</span>
+        </button>
+        <button class="chat-tab-item" data-tab="moments">
+          <svg class="chat-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="chat-tab-label">朋友圈</span>
+        </button>
+        <button class="chat-tab-item" data-tab="me">
+          <svg class="chat-tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="chat-tab-label">我</span>
+        </button>
+      </div>
+    </div>
+  </div>
+   <!-- 表情包导入弹窗 -->
+  <div class="image-select-modal" id="stickerImportModal">
+    <div class="image-select-inner" style="max-width:360px;">
+      <h4>导入表情包</h4>
+      <div style="margin-bottom:8px;">
+        <select class="sticker-group-select" id="stickerImportGroupSelect">
+          <option value="默认">默认</option>
+        </select>
+      </div>
+      <textarea class="sticker-import-textarea" id="stickerImportText" placeholder="支持两种格式，每行一个：&#10;1. 描述文字|图片URL&#10;2. 描述文字 图片URL（空格分隔，URL在后）&#10;例如：&#10;开心|https://example.com/happy.png&#10;晚安 https://example.com/goodnight.png"></textarea>
+      <div style="margin-top:8px;">
+        <input class="shezhi-input" id="stickerGroupName" placeholder="新分组名称（留空则导入到上方选择的分组）">
+      </div>
+      <div class="img-btn-row" style="margin-top:12px;">
+        <button class="img-btn-url" id="stickerImportConfirm">导入</button>
+        <button class="img-btn-cancel" id="stickerImportCancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 设置App弹窗容器（shezhi） ========== -->
+<div class="app-modal" id="shezhiModal">
+  <div class="app-modal-inner">
+    <div class="app-modal-header">
+      <button class="app-back-arrow-btn" id="shezhiBackBtn">‹</button>
+      <span class="app-modal-title">设置</span>
+      <span class="app-modal-subtitle" id="shezhiSubTitle"></span>
+      <button class="app-close-btn">✕</button>
+    </div>
+    <div class="app-modal-content">
+      <!-- 设置主页 -->
+      <div class="shezhi-main-page">
+        <div class="beauty-set-page">
+          <div class="set-block">
+            <div class="set-block-title">AI能力</div>
+            <div class="set-row" data-page="api">
+              <div class="set-row-label">API设置</div>
+              <div class="set-row-arrow">›</div>
+            </div>
+            <div class="set-row" data-page="voice">
+              <div class="set-row-label">音色设置</div>
+              <div class="set-row-arrow">›</div>
+            </div>
+            <div class="set-row" data-page="autoSummary">
+              <div class="set-row-label">自动总结</div>
+              <div class="set-row-arrow">›</div>
+            </div>
+            <div class="set-row" data-page="prompts">
+              <div class="set-row-label">提示词</div>
+              <div class="set-row-arrow">›</div>
+            </div>
+          </div>
+
+          <div class="set-block">
+            <div class="set-block-title">运行与通知</div>
+            <div class="set-row" data-page="keepAlive">
+              <div class="set-row-label">后台保活</div>
+              <div class="set-row-arrow">›</div>
+            </div>
+            <div class="set-row" data-page="notify">
+              <div class="set-row-label">消息提示</div>
+              <div class="set-row-arrow">›</div>
+            </div>
+            <div class="set-row" data-page="pushMsg">
+              <div class="set-row-label">主动发消息</div>
+              <div class="set-row-arrow">›</div>
+            </div>
+          </div>
+
+          <div class="set-block">
+            <div class="set-block-title">数据管理</div>
+            <div class="set-row" data-page="importExport">
+              <div class="set-row-label">导入 / 导出数据</div>
+              <div class="set-row-arrow">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 子页面容器，动态渲染 -->
+      <div class="shezhi-sub-page" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+  <input type="file" id="importFileInput" accept=".json" style="display:none;">
+
+  <!-- ========== 外卖商家详情弹窗 ========== -->
+  <div class="app-modal" id="merchantModal">
+    <div class="app-modal-inner">
+      <div class="app-modal-header">
+        <button class="app-close-btn" id="merchantCloseBtn">✕</button>
+        <span class="app-modal-title" id="merchantModalTitle">商家详情</span>
+        <span style="width:40px;"></span>
+      </div>
+      <div class="app-modal-content" id="merchantModalContent"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="shezhi.js"></script>
+  <script src="meihua.js"></script>
+  <script src="shijieshu.js"></script>
+  <script src="gouwu.js"></script>
+  <script src="liaotian.js"></script>
+  <script src="youxi.js"></script>
+  <script src="luntan.js"></script>
+  <script src="rili.js"></script>
+  <script src="yinyue.js"></script>
+
+
+</body>
+</html>
